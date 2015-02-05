@@ -3,13 +3,16 @@
 var irc = require('irc');
 
 module.exports = function (login, pass, callback) {
-	var guestnick = 'Guest' + require('crypto').randomBytes(3).toString('hex').toUpperCase();
+	callback(true);
+	return;
+	var guestnick = 'Guest' + require('crypto').randomBytes(4).toString('hex').toUpperCase();
 
 	var c = new irc.Client(
 		'irc.quakenet.org',
 		guestnick,
 		{ 
-			debug: true
+			// debug: true,
+			// channels: [ '#qwladderregistrations' ]
 		}
 	);
 
@@ -29,7 +32,7 @@ module.exports = function (login, pass, callback) {
 
 	});
 
-	setTimeout(c.disconnect(), 30000);
+	setTimeout(function(){c.disconnect()}, 30000); // maximum 30 seconds to hang around
 }
 
 /*

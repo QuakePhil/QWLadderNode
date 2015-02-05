@@ -7,13 +7,13 @@ http.createServer(function(request, response) {
         var parsed = url.parse(request.url, true)
 
 	if (parsed.pathname.slice(0, 7) == "/api/v1") {
-		api_endpoints(request, response);
+		api_endpoints(request, response)
 	} else if (parsed.pathname == "/welcome") {
-		render_view(request, response);
+		render_view(request, response)
 	} else {
 		response.writeHead(404)
-		response.write("oops");
-		response.end();
+		response.write("oops")
+		response.end()
 	}
-}).listen(8080)
+}).listen(8080 /*, 'optional interface' */)
 
