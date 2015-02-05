@@ -3,8 +3,10 @@
 var irc = require('irc');
 
 module.exports = function (login, pass, callback) {
-	callback(true);
-	return;
+
+callback(true);
+return;
+
 	var guestnick = 'Guest' + require('crypto').randomBytes(4).toString('hex').toUpperCase();
 
 	var c = new irc.Client(

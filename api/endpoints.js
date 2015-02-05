@@ -1,5 +1,10 @@
 var url = require('url');
 var qs = require('querystring');
+var mongojs = require('mongojs')
+var config = require('../../config.js');
+
+var db = mongojs.connect(config.mongo_uri, config.mongo_collections)
+
 var external_auth = require('./quakenet.js');
 
 // note: should we have an api object?
@@ -13,8 +18,8 @@ var external_auth = require('./quakenet.js');
 // as well as implement an "authed as of"
 
 // note: these arrays need to be protected against flooding
-var users = [];
-var tokens = {}; // only one token per user so far
+//var users = [];
+//var tokens = {}; // only one token per user so far
 
 function new_hash(value) {
 	return require('crypto').createHash('sha1').update(value).digest('hex');
@@ -22,7 +27,15 @@ function new_hash(value) {
 
 function new_token(user) {
 	var token = require('crypto').randomBytes(20).toString('hex');
-	tokens[token] = user; // should we support multiple tokens?
+	db.tokens.update({
+		token: token
+	}, {
+		token: token,
+		created: (new Date()).getTime(),
+		user: user
+	}, {
+		upsert: true
+	});
 	return token;
 }
 
@@ -35,6 +48,44 @@ var endpoints = {
 	"/api/v1/register": function(req, response, body) {
 		console.log('endpoint: ' + req.pathname);
 
+		db.users.findOne({ login: body.login }, function(error, user) {
+			if (!user) {
+				APIresult(response, {error: "User not found"})
+			} else if (user['auth_status'] == 0 || user['auth_status'] == 2) {
+				external_auth(body.login, body.pass, function(success) {
+					console.log('ext auth: ' + success)
+					if (success) {
+						var token = new_token(body.login);
+						db.users.update({ login: body.login },{
+							'$set': {
+								'auth_status': 3,
+								'pass_hash': new_hash(body.pass),
+								'token': token
+							}
+						});
+						APIresult(response, token);
+					} else {
+						db.users.update({ login: body.login },{
+							'$set': {'auth_status': 2}
+						});
+						APIresult(response, {error: "External auth failed"});
+					}
+				})
+			} else if (user['auth_status'] == 1) {
+				APIresult(response, {error: "External auth pending"});
+			} else if (user['auth_status'] == 3) {
+				db.users.findOne({login: body.login}, function(error, user){
+					if (new_hash(body.pass) == user['pass_hash'])
+						APIresult(response, {error: "Already registered, use /api/v1/token if you forgot your token"});
+					else
+						APIresult(response, {error: "Login failed"});
+				})
+			} else {
+				APIresult(response, {error: "Please login"});
+			}
+
+		})
+/*
 		if (users[body.login].auth_status == 0 || users[body.login].auth_status == 2) {
 			external_auth(body.login, body.pass, function(success) {
 				console.log('external auth result: ' + success);
@@ -58,6 +109,7 @@ var endpoints = {
 		} else {
 			APIresult(response, {"error": "Please try again later"})
 		}
+*/
 	},
 	"/api/v1/token": function(req, response, body) {
 		if (users[body.login].auth_status == 3 && new_hash(body.pass) == users[body.login].pass_hash) {
@@ -76,27 +128,23 @@ var endpoints = {
 function processAPI(request, response, body) {
 	var req = url.parse(request.url, true);
 
-	// check that req.pathname begins with /api/v1 here ?
-	// or outside in the server.js handler
-	
-	//if (login == '' && token == '')
-	//	APIresult(response, { "error": "Login required" })
-
-	if (body && body.login && !users[body.login]) {
-		console.log("New user: " + body.login);
-		var user = {};
-// auth_status: 0 - not authorized
-//              1 - quakenet authorization pending
-//              2 - quakenet authorization failed
-//              3 - quakenet authorization succeeded
-// 
-		users[body.login] = {
+	if (body.login) db.users.findAndModify({
+		query: { login: body.login },
+		update: { $set: { lastseen: (new Date()).getTime() } },
+		new: true
+	}, function(error, data, lastErrorObject) {
+		if (!data) // new entry
+			// auth_status: 0 - not authorized
+			//              1 - external authorization pending
+			//              2 - external authorization failed
+			//              3 - external authorization succeeded
+		db.users.insert({
+			login: body.login,
 			auth_status: 0,
 			pass_hash: '',
 			token: '',
-		};
-		users.push(user);
-	}
+		})
+	});
 
 	var endpoint = endpoints[req.pathname];
 
@@ -111,11 +159,20 @@ function processAPI(request, response, body) {
 			// validate non blank login/pass here?
 			endpoint(req, response, body)
 
+// todo: instead of using users[], secure this against db.users.
 		// everything else is secured
-		} else if (!tokens[candidate_token] || !users[tokens[candidate_token]] || candidate_token != users[tokens[candidate_token]].token)
-			APIresult(response, { "error": "Must /api/v1/login first" })
-		else
-			endpoint(req, response, body)
+//		} else if (!tokens[candidate_token] || !users[tokens[candidate_token]] || candidate_token != users[tokens[candidate_token]].token) {
+//			APIresult(response, { "error": "Must /api/v1/login first" })
+//		} else
+//			endpoint(req, response, body)
+		} else {
+			db.tokens.findOne({token: candidate_token}, function(error, data){
+				if (data)
+					APIresult(response, "call endpoint here")
+				else
+					APIresult(response, { "error": "Must /api/v1/login first" })
+			})
+		}
 	} else {
 		APIresult(response, { "error": "Endpoint not found" })
 	}

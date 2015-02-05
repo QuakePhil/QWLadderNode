@@ -1,7 +1,10 @@
-var http = require('http')
-var url = require('url')
-var api_endpoints = require('./api/endpoints.js')
-var render_view = require('./render/view.js')
+//var config = require('../config.js');
+var
+	http = require('http'),
+	url = require('url'),
+	mongojs = require('mongojs'),
+	api_endpoints = require('./api/endpoints.js'),
+	render_view = require('./render/view.js');
 
 http.createServer(function(request, response) {
         var parsed = url.parse(request.url, true)
