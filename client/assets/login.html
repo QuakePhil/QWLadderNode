@@ -1,0 +1,16 @@
+<form class="form-signin">
+	<p>Authenticate with TheQBot@CServe.quakenet.org</p>
+	<p><a target="_blank" href=https://www.quakenet.org/help/q/how-to-register-an-account-with-q>How to register an account with Q</a></p>
+
+	<label for="inputQLogin" class="sr-only">QNet Login</label>
+	<input ng-model="login.login" type="login" id="inputQLogin" class="form-control" placeholder="QNet Login" required autofocus>
+
+	<label for="inputPassword" class="sr-only">Password</label>
+	<input ng-model="login.pass" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+
+	<div class="checkbox">
+		<label><input ng-model="login.remember" type="checkbox" value="remember-me">Remember me</input></label>
+	</div>
+
+	<button class="btn btn-lg btn-primary btn-block" ng-click="QNetAuth()">Login</button>
+</form>

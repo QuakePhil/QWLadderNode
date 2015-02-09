@@ -1,0 +1,151 @@
+var LadderApp = angular.module('LadderApp', ['ui.router', 'ui.bootstrap', 'ngResource'] );
+
+/*
+LadderApp.controller('LadderController',
+['$scope',
+function ($scope) {
+	$scope.greetMe = 'Test';
+	$scope.QNetLogin = function() {
+		alert('try login');
+	}
+}]);
+*/
+
+// ==================================================
+
+var LadderToken = 'notoken';
+
+LadderApp.controller('LoginModalController', 
+['$scope', '$resource', 
+function ($scope, $resource) {
+	
+	this.cancel = $scope.$dismiss;
+	this.submit = function (login, pass) {
+		console.log('check login api here: ' + login + ',' + pass);
+	};
+/*
+	$modal.open({
+		templateUrl: '/assets/login.html',
+		controller: ['$scope', '$modalInstance', 'values', function($scope, $modalInstance, values) {
+			$scope.values = values;
+			$scope.QNetLogin = function() {
+				console.log(LadderToken);
+				console.log($scope.values);
+				console.log(values);
+				LadderToken = 'blah';
+				$modalInstance.close();
+			}
+		}],
+		resolve: {
+			values: function () { 
+console.log("resolving");
+console.log($scope.login);
+console.log("done resolving");
+return $scope.login; //[ $scope.login, $scope.pass] ;
+			}
+		}
+	});
+*/
+	//alert('checking token');
+	//$scope.auth = 'not authed';
+	//console.log($resource('/api/v1/unsecured').query());
+}]);
+
+LadderApp.service('LoginModal', ['$modal','$rootScope',function ($modal, $rootScope) {
+	function assignToken(token) {
+		$rootScope.currentToken = token;
+		return token;
+	}
+
+	return function() {
+		var instance = $modal.open({
+			templateUrl: '/assets/login.html',
+			controller: 'LoginModalController'
+		})
+		return instance.result.then(assignToken);
+	}
+}]);
+
+// ==================================================
+// user interface routing
+// ==================================================
+LadderApp.config(
+['$stateProvider', '$urlRouterProvider', '$httpProvider', '$locationProvider',
+function($stateProvider, $urlRouterProvider, $httpProvider, $locationProvider) {
+	$urlRouterProvider.otherwise("/");
+	$locationProvider.html5Mode(true);
+
+	$stateProvider
+
+	.state('search', {
+		url: '/',
+		templateUrl: '/assets/search.html',
+		data: { requireLogin: true }
+	})
+
+	.state('rankings', {
+		url: '/rankings',
+		templateUrl: '/assets/rankings.html',
+		//controller: 'TokenController',
+		data: { requireLogin: true }
+	})
+
+	.state('about', {
+		url: '/about',
+		templateUrl: '/assets/about.html',
+		data: { requireLogin: false }
+//		controller: ['$scope', '$resource', '$modal', checkToken]
+	});
+/*
+	$httpProvider.interceptors.push(function ($timeout, $q, $injector) {
+		var LoginModal, $http, $state;
+
+		// this trick must be done so that we don't receive
+		// `Uncaught Error: [$injector:cdep] Circular dependency found`
+		$timeout(function () {
+			LoginModal = $injector.get('LoginModal');
+			$http = $injector.get('$http');
+			$state = $injector.get('$state');
+		});
+
+		return { responseError: function (rejection) {
+			if (rejection.status !== 401)
+				return rejection;
+
+			var deferred = $q.defer();
+
+			LoginModal().then(function () {
+				deferred.resolve( $http(rejection.config) );
+			}).catch(function () {
+				$state.go('rankings');
+				deferred.reject(rejection);
+			});
+
+			return deferred.promise;
+		}}
+	);*/
+}]);
+
+// ==================================
+// app logic
+// ==================================
+LadderApp.run(['$rootScope',function ($rootScope) {
+
+	// referenced from: http://brewhouse.io/blog/2014/12/09/authentication-made-simple-in-single-page-angularjs-applications.html
+	$rootScope.$on('$stateChangeStart', function(event, toState, toParams) {
+		console.log(toState);
+		if (toState.data.requireLogin && typeof $rootScope.currentToken === 'undefined') {
+		event.preventDefault();
+
+		LoginModal()
+		.then(function () {
+		console.log('login succeeded');
+		return $state.go(toState.name, toParams);
+		})
+		.catch(function () {
+		console.log('login failed');
+		$state.go('rankings');
+		});
+		}
+	});
+}]);

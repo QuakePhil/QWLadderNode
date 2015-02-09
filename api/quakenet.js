@@ -1,11 +1,8 @@
 #!/usr/bin/env node
 
-var irc = require('irc');
+const irc = require('irc');
 
 module.exports = function (login, pass, callback) {
-
-callback(true);
-return;
 
 	var guestnick = 'Guest' + require('crypto').randomBytes(4).toString('hex').toUpperCase();
 

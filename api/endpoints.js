@@ -1,7 +1,7 @@
-var url = require('url');
-var qs = require('querystring');
-var mongojs = require('mongojs')
-var config = require('../../config.js');
+const url = require('url');
+const qs = require('querystring');
+const mongojs = require('mongojs')
+const config = require('../../config.js');
 
 var db = mongojs.connect(config.mongo_uri, config.mongo_collections)
 
@@ -47,8 +47,9 @@ function APIresult(response, result) {
 var endpoints = {
 	"/api/v1/register": function(req, response, body) {
 		console.log('endpoint: ' + req.pathname);
-
-		db.users.findOne({ login: body.login }, function(error, user) {
+		if (!body.pass)
+			APIresult(response, {error: "Password required"})
+		else db.users.findOne({ login: body.login }, function(error, user) {
 			if (!user) {
 				APIresult(response, {error: "User not found"})
 			} else if (user['auth_status'] == 0 || user['auth_status'] == 2) {
@@ -112,12 +113,29 @@ var endpoints = {
 */
 	},
 	"/api/v1/token": function(req, response, body) {
+		if (!body.pass)
+			APIresult(response, {error: "Password required"})
+		else db.users.findOne({ login: body.login }, function(error, user) {
+			if (!user) {
+				APIresult(response, {error: "User not found"})
+			} else if (user['auth_status'] == 3 && new_hash(body.pass) == user['pass_hash']) {
+				var token = new_token(body.login);
+				db.users.update({ login: body.login },{
+					'$set': { 'token': token }
+				});
+				APIresult(response, token);
+			} else {
+				APIresult(response, {error: "Please login"});
+			}
+		})
+/*
 		if (users[body.login].auth_status == 3 && new_hash(body.pass) == users[body.login].pass_hash) {
 			users[body.login].token = new_token(body.login);
 			APIresult(response, users[body.login].token);
 		} else {
 			APIresult(response, {"error": "Please login"})
 		}
+*/
 	},
 	"/api/v1/secured": function(req, response, body) {
 		var date = new Date();

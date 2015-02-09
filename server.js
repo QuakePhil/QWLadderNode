@@ -1,22 +1,25 @@
-//var config = require('../config.js');
-var
-	http = require('http'),
-	url = require('url'),
-	mongojs = require('mongojs'),
-	api_endpoints = require('./api/endpoints.js'),
-	render_view = require('./render/view.js');
+'use strict';
+const http = require('http');
+// use path for /local/pathnames ?
+const url = require('url');
+const mongojs = require('mongojs');
+const api_endpoints = require('./api/endpoints.js');
+const render_view = require('./render/view.js');
 
 http.createServer(function(request, response) {
         var parsed = url.parse(request.url, true)
-
+console.log(parsed);
 	if (parsed.pathname.slice(0, 7) == "/api/v1") {
 		api_endpoints(request, response)
-	} else if (parsed.pathname == "/welcome") {
-		render_view(request, response)
 	} else {
-		response.writeHead(404)
-		response.write("oops")
-		response.end()
+		render_view(request, response, parsed)
 	}
-}).listen(8080 /*, 'optional interface' */)
 
+//	} else {
+//		response.writeHead(404)
+//		response.write("oops")
+//		response.end()
+//	}
+}).listen(8080).on('listening', function() {
+	console.log('Up and running');
+});
