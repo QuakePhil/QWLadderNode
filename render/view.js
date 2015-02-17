@@ -10,6 +10,8 @@ module.exports = function (request, response, parsed) {
 			parsed.pathname.lastIndexOf('.') + 1
 		);
 		var types = {
+			 'gif': 'image/gif',
+			 'png': 'image/png',
 			 'js': 'application/javascript',
 			  'css': 'text/css',
 		};			

@@ -1,48 +1,22 @@
-var LadderApp = angular.module('LadderApp', ['ui.router', 'ui.bootstrap'] );
+angular.module('LadderApp', ['ui.router', 'ui.bootstrap', 'ngWebSocket'] )
 
-LadderApp.controller('PopupController', ['$scope', '$http', '$modalInstance', function($scope, $http, $modalInstance) {
-	$scope.QNetAuth = function() {
-		console.log($scope.login);
-		$http
-		.post('/api/v1/secured', {  })
-		.success(function (response) {
-			console.log(response);
-		})
-		.error(function (error) {
-			console.log("error:");
-			console.log(error);
-		});
-	};
-}]);
+.config(
+['$stateProvider', '$urlRouterProvider', '$locationProvider', '$compileProvider', 
+function($stateProvider, $urlRouterProvider, $locationProvider, $compileProvider) {
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|qw):/);
 
-LadderApp.controller('LadderController', ['$scope', '$http', '$modal', function($scope, $http, $modal) {
-	$scope.login = {};
-
-	$http
-	.post('/api/v1/secured', { })
-	.success(function (response) {
-		console.log(response);
-		if (response.error) $modal.open({
-			templateUrl: '/assets/login.html',
-			controller: 'PopupController'
-		})
-	})
-	.error(function (error) {
-		console.log("error:");
-		console.log(error);
-	});
-}]);
-
-LadderApp.config(
-['$stateProvider', '$urlRouterProvider', '$locationProvider',
-function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$urlRouterProvider.otherwise("/");
 	$locationProvider.html5Mode(true);
 
 	$stateProvider
 
-	.state('search', {
+	.state('serveme', {
 		url: '/',
+		templateUrl: '/assets/serveme.html',
+	});
+/*
+	.state('search', {
+		url: '/search',
 		templateUrl: '/assets/search.html',
 	})
 
@@ -55,4 +29,5 @@ function($stateProvider, $urlRouterProvider, $locationProvider) {
 		url: '/about',
 		templateUrl: '/assets/about.html',
 	});
+*/
 }]);

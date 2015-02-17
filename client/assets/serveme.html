@@ -1,0 +1,13 @@
+<div class="landing-template" ng-controller="ServemeController">
+<p class="lead">Serveme</p>
+<div style="border: 1px solid black;" ng-repeat="data in ServemeData"
+ng-mouseover="data.imgurl = '/assets/quakemouseover.gif'" 
+ng-mouseout="data.imgurl = '/assets/quakeface.png'">
+<span><img width=100px height=100px src="{{ data.imgurl ? data.imgurl : '/assets/quakeface.png' }}"
+border="0" />
+{{ data.nick }}</span>
+<a href="{{ data.link }}">{{ data.message }}</a>
+{{ data.players }}
+</p>
+<p>Done</p>
+</div>
