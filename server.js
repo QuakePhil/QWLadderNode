@@ -1,4 +1,4 @@
-'use strict';
+//'use strict';
 const http = require('http');
 // use path for /local/pathnames ?
 const url = require('url');
@@ -22,6 +22,6 @@ http.createServer(function(request, response) {
 //		response.write("oops")
 //		response.end()
 //	}
-}).listen(8080).on('listening', function() {
+}).listen(80).on('listening', function() {
 	console.log('Up and running');
 });

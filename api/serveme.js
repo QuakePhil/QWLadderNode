@@ -1,6 +1,12 @@
-const WebSocketServer = require('ws').Server;
+const config = require('../config.js');
 const irc = require('irc');
-const wss = new WebSocketServer({port: 8081});
+const mongojs = require('mongojs');
+const servmeParse = require('./qw.js');
+const WebSocketServer = require('ws').Server;
+
+var db = mongojs.connect(config.mongo_uri, ['serveme']);
+
+var wss = new WebSocketServer({port: 81});
 
 /*
 module.exports = function () {
@@ -36,40 +42,25 @@ module.exports = function () {
 */
 
 
-var mainChannel = '#qwwebapptesting'; // '#quakeworld';
-var servemeMask = 'QuakePhil' // '[ServeMe]';
-
 var c = new irc.Client(
 	'irc.quakenet.org',
 	'QWWebApp',
 		{ 
 			debug: true,
-			channels: [ mainChannel ]
+			channels: [ config.channel ]
 		}
 	);
 
-var ServeMe = [];
-
 c.addListener('raw', function(message) {
-	console.log(message);
-
 	if (message.args[1])
-	if (message.prefix && message.prefix.indexOf(
-		//"QuakePhil"
-		servemeMask
-		) == 0
- && message.args[0] == mainChannel
- && message.args[1].indexOf("-qw- ") == 0) {
+	if (message.prefix
+		 && message.prefix.indexOf(config.servemeMask) == 0
+		 && message.args[0] == config.channel
+		 && message.args[1].indexOf("-qw- ") == 0) {
 
-		var vars = message.args[1].split(' ', 7);
-		var newQW = {};
-		console.log(vars);
-		newQW.nick = vars[1];
-		newQW.link = vars[3];
-		newQW.players = vars[4];
-		newQW.message = vars[6];
-		
-		ServeMe.push(newQW);
+		var newQW = servmeParse(message.args[1]);
+		console.log(newQW);
+		db.serveme.insert(newQW);
 		}
 
 		// end of MOTD || MOTD is missing
@@ -89,8 +80,9 @@ wss.on('connection', function connection(ws) {
 	ws.on('message', function incoming(message) {
 		console.log('received: %s', message);
 		});
-	console.log(JSON.stringify(ServeMe));
-	ws.send(JSON.stringify(ServeMe));
+	db.users.find({},function(error, data){
+		var jsondata = JSON.stringify(data);
+		console.log(jsondata);
+		ws.send(jsondata);
+		});
 	});
-
-

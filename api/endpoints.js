@@ -1,7 +1,7 @@
 const url = require('url');
 const qs = require('querystring');
 const mongojs = require('mongojs')
-const config = require('../../config.js');
+const config = require('../config.js');
 
 var db = mongojs.connect(config.mongo_uri, config.mongo_collections)
 

@@ -1,5 +1,5 @@
 var mongojs = require('mongojs')
-var config = require('../config.js');
+var config = require('./config.js');
 var db = mongojs.connect(config.mongo_uri, config.mongo_collections)
 
 /*

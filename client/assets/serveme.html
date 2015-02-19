@@ -1,4 +1,10 @@
-<div class="landing-template" ng-controller="ServemeController">
+<div ng-controller="ServemeController">
+<carousel interval=5000>
+<slide ng-repeat="data in ServemeData">
+<img ng-src="{{data.image}}" style="margin:auto;" >
+</slide>
+</caroutsel>
+
 <p class="lead">Serveme</p>
 <div style="border: 1px solid black;" ng-repeat="data in ServemeData"
 ng-mouseover="data.imgurl = '/assets/quakemouseover.gif'" 
