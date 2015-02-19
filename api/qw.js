@@ -16,7 +16,7 @@ module.exports = function servemeParse(line) { // todo: get stamp from irc line
 		invalid = 1;
 		}
 	newQW.line = line;
-	newQW.stamp = (new Date()).getTime();
+	newQW.stamp = Date.now();
 	if (invalid == 1)
 		return newQW;
 

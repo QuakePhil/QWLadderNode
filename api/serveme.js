@@ -3,10 +3,12 @@ const irc = require('irc');
 const mongojs = require('mongojs');
 const servmeParse = require('./qw.js');
 const WebSocketServer = require('ws').Server;
+const serverlist = require('./serverlist.js');
+const dns = require('dns');
 
 var db = mongojs.connect(config.mongo_uri, ['serveme']);
 
-var wss = new WebSocketServer({port: 81});
+var wss = new WebSocketServer({port: config.port_serveme});
 
 /*
 module.exports = function () {
@@ -46,7 +48,7 @@ var c = new irc.Client(
 	'irc.quakenet.org',
 	'QWWebApp',
 		{ 
-			debug: true,
+//			debug: true,
 			channels: [ config.channel ]
 		}
 	);
@@ -59,8 +61,28 @@ c.addListener('raw', function(message) {
 		 && message.args[1].indexOf("-qw- ") == 0) {
 
 		var newQW = servmeParse(message.args[1]);
-		console.log(newQW);
-		db.serveme.insert(newQW);
+
+		serverlist(function(mapsbyip){
+			if (newQW.link) {
+				var ipport = newQW.link.substring(5);
+				mapsbyip.forEach(function(a, b){
+					if (a[ipport]) newQW.map = a[ipport];
+					});
+				}
+			if (!newQW.map) {
+				var ipport = newQW.link.substring(5).split(':');
+				dns.lookup(ipport[0], function (err, address, family) {
+					var lookupport = address + ':' + ipport[1];
+					mapsbyip.forEach(function(a, b){
+						if (a[lookupport]) newQW.map = a[lookupport];
+						});
+					db.serveme.insert(newQW);
+					})
+				}
+			else {
+				db.serveme.insert(newQW);
+				}
+			});
 		}
 
 		// end of MOTD || MOTD is missing
@@ -80,7 +102,7 @@ wss.on('connection', function connection(ws) {
 	ws.on('message', function incoming(message) {
 		console.log('received: %s', message);
 		});
-	db.users.find({},function(error, data){
+	db.serveme.find({},function(error, data){
 		var jsondata = JSON.stringify(data);
 		console.log(jsondata);
 		ws.send(jsondata);

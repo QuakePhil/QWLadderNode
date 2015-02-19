@@ -1,19 +1,17 @@
 <div ng-controller="ServemeController">
-<carousel interval=5000>
-<slide ng-repeat="data in ServemeData">
-<img ng-src="{{data.image}}" style="margin:auto;" >
-</slide>
-</caroutsel>
-
-<p class="lead">Serveme</p>
-<div style="border: 1px solid black;" ng-repeat="data in ServemeData"
-ng-mouseover="data.imgurl = '/assets/quakemouseover.gif'" 
-ng-mouseout="data.imgurl = '/assets/quakeface.png'">
-<span><img width=100px height=100px src="{{ data.imgurl ? data.imgurl : '/assets/quakeface.png' }}"
-border="0" />
-{{ data.nick }}</span>
-<a href="{{ data.link }}">{{ data.message }}</a>
-{{ data.players }}
-</p>
-<p>Done</p>
+  <div style="height: 305px">
+    <carousel interval="3000">
+      <slide ng-repeat="data in ServemeData" active="slide.active">
+        <img ng-src="http://qtv.atrophied.co.uk/Content/Images/Levelshots/{{data.map}}.jpg" style="margin:auto;">
+        <div class="carousel-caption">
+          <h4>Slide {{$index}}</h4>
+          <p>{{data.nick}}</p>
+          <p>{{data.message}}</p>
+          <p>{{data.link}}</p>
+        </div>
+      </slide>
+    </carousel>
+  </div>
 </div>
+
+Thanks <a href=http://gfx.quakeworld.nu/details/201/high-quality-levelshots-all-maps/ target=_blank>senft</a> for the levelshots!
