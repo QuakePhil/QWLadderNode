@@ -1,17 +1,14 @@
 <div ng-controller="ServemeController">
-  <div style="height: 305px">
+  <div style="height: 540px; width: 720px">
     <carousel interval="3000">
-      <slide ng-repeat="data in ServemeData" active="slide.active">
-        <img ng-src="http://qtv.atrophied.co.uk/Content/Images/Levelshots/{{data.map}}.jpg" style="margin:auto;">
+      <slide ng-repeat="data in ServemeData" active="data.active">
+        <img ng-src="/ls/{{data.map}}" style="margin:auto; height: 540px;">
         <div class="carousel-caption">
-          <h4>Slide {{$index}}</h4>
-          <p>{{data.nick}}</p>
-          <p>{{data.message}}</p>
-          <p>{{data.link}}</p>
+          <h1><a href={{data.link}}>{{data.link}}</a><h1>
+          <h4>{{data.nick}}: {{data.message}}</h4>
         </div>
       </slide>
     </carousel>
   </div>
 </div>
-
 Thanks <a href=http://gfx.quakeworld.nu/details/201/high-quality-levelshots-all-maps/ target=_blank>senft</a> for the levelshots!

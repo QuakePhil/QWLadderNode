@@ -10,48 +10,16 @@ var db = mongojs.connect(config.mongo_uri, ['serveme']);
 
 var wss = new WebSocketServer({port: config.port_serveme});
 
-/*
-module.exports = function () {
-	response.writeHead(200, {
-		'Access-Control-Allow-Origin': '*', // CORS
-		'Access-Control-Allow-Methods': '*',
-
-		'Content-Type': 'application/json'
+wss.broadcast = function broadcast(data) {
+	wss.clients.forEach(function each(client) {
+		client.send(data);
 	});
+};
 
-	request.setEncoding('utf8');
-
-	var body = '';
-	if (request.method == "POST") {
-		request.on('data', function (data) {
-			body += data;
-			if (body.length > 1e6) // maximum upload file (1e6 - 1 million)
-				request.connection.destroy();
-		});
-		request.on('end', function () {
-			processAPI(request, response, qs.parse(body));
-
-			//response.write(JSON.stringify(processAPI(request, qs.parse(body))));
-			//response.end();
-		});
-	}
-	else {
-		processAPI(request, response, body);
-		//response.write(JSON.stringify(processAPI(request, body)));
-		//response.end();
-	}
-}
-*/
-
-
-var c = new irc.Client(
-	'irc.quakenet.org',
-	'QWWebApp',
-		{ 
-//			debug: true,
-			channels: [ config.channel ]
-		}
-	);
+var c = new irc.Client('irc.quakenet.org', 'QWWebApp', {
+	debug: true,
+	channels: [ config.channel ]
+	});
 
 c.addListener('raw', function(message) {
 	if (message.args[1])
@@ -62,6 +30,10 @@ c.addListener('raw', function(message) {
 
 		var newQW = servmeParse(message.args[1]);
 
+		// serverlist queries a rss feed and returns a hash mapsbyip
+		// in the form of [{ip, currentmap},{ip,currentmap}....]
+		// because this info is absent from serveme.
+		// cleaner would be to packet the ip directly with status aka qstat
 		serverlist(function(mapsbyip){
 			if (newQW.link) {
 				var ipport = newQW.link.substring(5);
@@ -82,6 +54,11 @@ c.addListener('raw', function(message) {
 			else {
 				db.serveme.insert(newQW);
 				}
+			db.serveme.find({},function(error, data){
+				var jsondata = JSON.stringify(data);
+				console.log(jsondata);
+				wss.broadcast(jsondata);
+				});
 			});
 		}
 
@@ -90,12 +67,6 @@ c.addListener('raw', function(message) {
 //		c.send("PRIVMSG", "Q@Cserve.quakenet.org", "AUTH " + login + " " + pass);
 
 	});
-
-wss.broadcast = function broadcast(data) {
-	wss.clients.forEach(function each(client) {
-		client.sent(data);
-	});
-};
 
 wss.on('connection', function connection(ws) {
 	console.log('Connection accepted');

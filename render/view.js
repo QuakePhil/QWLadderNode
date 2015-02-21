@@ -24,19 +24,24 @@ module.exports = function (request, response, parsed) {
 		//response.write("asset found: " + parsed.pathname);
 		//response.end();
 		}
-	else if (parsed.pathname.indexOf('/levelshots/') == 0) {
+	else if (parsed.pathname.indexOf('/ls/') == 0) {
+		var levelshotDefault = 1;
+		response.writeHead(200, {
+			'Content-Type': 'image/jpg'
+			});
 		try {
 			var map = parsed.pathname.split('/');
-			if (config.levelshots.indexOf(map[2]) != -1) {
-				response.writeHead(200, {
-					'Content-Type': 'image/jpg'
-					});
+			//if (config.levelshots.indexOf(map[2]) != -1) {
+			if (fs.existsSync(config['levelshot_root'] + map[2] + '.jpg')) {
+				levelshotDefault = 0;
 				fs.createReadStream(config['levelshot_root'] + map[2] + '.jpg').pipe(response);
 				}
 			}
 		catch (e) {
 			console.log(e);
 			}
+		if (levelshotDefault == 1) // unknown map/don't have levelshot
+			fs.createReadStream(config['levelshot_root'] + '_notfound.jpg').pipe(response);
 		}
 	else {
 		console.log("Rendering client view: " + parsed.pathname);
