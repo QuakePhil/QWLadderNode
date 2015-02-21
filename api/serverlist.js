@@ -2,7 +2,7 @@ var parseString = require('xml2js').parseString;
 var http = require('http')
 var bl = require('bl')
 
-var mapsbyip = [];
+var mapsbyip = {};
 var serverlistAge = 0;
 
 module.exports = function serverlist(cb) {
@@ -19,17 +19,11 @@ module.exports = function serverlist(cb) {
 			parseString(data, function(err, result) {
 				result.rss.channel[0].item.forEach(function (val) {
 					if (val.hostname.toString() !== '') {
-						var item = {};
 						var key = val.hostname + ':' + val.port;
-						item[key] = val.map.toString();
-						if (key.substring(0,3) == '75.')
-							mapsbyip.push(item);
+						mapsbyip[key] = val.map.toString();
 						}
-					var item = {};
 					var key = val.ip + ':' + val.port;
-					item[key] = val.map.toString();
-					if (key.substring(0,3) == '75.')
-						mapsbyip.push(item);
+					mapsbyip[key] = val.map.toString();
 					});
 				// in the form of [ {ipport1: dm3}, {ipport2: dm4}, ... ] 
 				cb(mapsbyip);

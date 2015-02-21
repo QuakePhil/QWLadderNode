@@ -45,6 +45,14 @@ module.exports = function servemeParse(line) { // todo: get stamp from irc line
 			break;
 		default:
 		}
+
+	if (newQW.link) {
+		var ipport = newQW.link.substring(5).split(':');
+		if (ipport.length == 2) {
+			newQW.linkip = ipport[0];
+			newQW.linkport = ipport[1];
+			}
+		}
 		
 	return newQW;
   	}

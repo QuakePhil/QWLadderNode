@@ -1,15 +1,25 @@
 <div ng-controller="ServemeController">
-  <div style="height: 540px; width: 720px">
+<h1>QuakeWorld pick-up game spots open: 0</h1>
+  <div style="display: inline-block; width:720px; height: 540px; vertical-align: top;">
     <carousel interval="3000">
-      <slide ng-repeat="data in ServemeData" active="data.active">
+      <slide ng-repeat="data in ServemeData | gt:stampCutoff" active="data.active">
         <img ng-src="/ls/{{data.map}}" style="margin:auto; height: 540px;">
         <div class="carousel-caption" style="margin-bottom: 145px;">
           <h4>{{data.stamp | date: 'short'}}</h4>
-          <h1><a href={{data.link}}>{{data.link}}</a><h1>
+          <h1><a href={{data.link}} style="color: white;">{{data.link}}</a><h1>
           <h4>{{data.nick}}: {{data.message}}</h4>
         </div>
       </slide>
     </carousel>
+  </div>
+  <div style="display: inline-block; width:410px; vertical-align: top;">
+    <accordion close-others="true">
+      <accordion-group ng-repeat="data in ServemeData | gt:stampCutoff"
+        heading="{{data.link}}" is-open="data.active" style="cursor:pointer">
+        <p>Join: <a href={{data.link}}>{{data.map.toUpperCase()}}</a></p>
+        <p>[{{data.stamp | date: 'short' }}] {{data.nick}}: {{data.message}}</p>
+      </accordion-group>
+    </accordion>
   </div>
 </div>
 Thanks <a href=http://qtv.quakeworld.nu/ target=_blank>QTV</a> for the levelshots!
