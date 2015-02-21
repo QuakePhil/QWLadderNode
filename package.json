@@ -8,6 +8,7 @@
     "fs-extra": "*",
     "irc": "*",
     "mongodb": "*",
+    "mongojs": "*",
     "request": "*",
     "ws": "*",
     "xml2js": "*"
