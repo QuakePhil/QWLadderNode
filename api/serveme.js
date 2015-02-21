@@ -49,18 +49,17 @@ c.addListener('raw', function(message) {
 					mapsbyip.forEach(function(a, b){
 						if (a[lookupport]) newQW.map = a[lookupport];
 						});
-					db.serveme.insert(newQW);
 					})
 				}
-			else {
-				db.serveme.insert(newQW);
-				}
+			// we are doing find before insert, because if we insert into mongo and then find
+			// we are not guaranteed for the find to include the most recently inserted record
+			// (timing issues? or am I missing something basic about mongo here)
 			db.serveme.find({},function(error, data){
+				data.push(newQW);
 				var jsondata = JSON.stringify(data);
-				console.log("Broadcasting:");
-				console.log(jsondata);
 				wss.broadcast(jsondata);
 				});
+				db.serveme.insert(newQW);
 			});
 		}
 
