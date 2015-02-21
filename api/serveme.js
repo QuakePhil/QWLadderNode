@@ -28,6 +28,7 @@ c.addListener('raw', function(message) {
 		 && message.args[0] == config.channel
 		 && message.args[1].indexOf("-qw- ") == 0) {
 
+		// serveme parse takes a -qw- line and spits out an object
 		var newQW = servmeParse(message.args[1]);
 
 		// serverlist queries a rss feed and returns a hash mapsbyip
@@ -56,6 +57,7 @@ c.addListener('raw', function(message) {
 				}
 			db.serveme.find({},function(error, data){
 				var jsondata = JSON.stringify(data);
+				console.log("Broadcasting:");
 				console.log(jsondata);
 				wss.broadcast(jsondata);
 				});

@@ -3,7 +3,8 @@
     <carousel interval="3000">
       <slide ng-repeat="data in ServemeData" active="data.active">
         <img ng-src="/ls/{{data.map}}" style="margin:auto; height: 540px;">
-        <div class="carousel-caption">
+        <div class="carousel-caption" style="margin-bottom: 145px;">
+          <h4>{{data.stamp | date: 'short'}}</h4>
           <h1><a href={{data.link}}>{{data.link}}</a><h1>
           <h4>{{data.nick}}: {{data.message}}</h4>
         </div>
@@ -11,4 +12,4 @@
     </carousel>
   </div>
 </div>
-Thanks <a href=http://gfx.quakeworld.nu/details/201/high-quality-levelshots-all-maps/ target=_blank>senft</a> for the levelshots!
+Thanks <a href=http://qtv.quakeworld.nu/ target=_blank>QTV</a> for the levelshots!
