@@ -1,6 +1,6 @@
 angular.module('LadderApp', ['ui.router', 'ui.bootstrap', 'ngWebSocket'] )
 
-.constant('wsServerPort', 'ws://192.168.1.105:8081')
+.constant('wsServerPort', 'ws://qwladder.herokuapp.com:8081')
 
 .config(
 ['$stateProvider', '$urlRouterProvider', '$locationProvider', '$compileProvider', 
