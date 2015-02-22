@@ -2,7 +2,7 @@
   "name": "QWLadder",
   "description": "QW Ladder Web App",
   "version": "0.0.1",
-  "devDependencies": {
+  "dependencies": {
     "bl": "*",
     "feedparser": "*",
     "fs-extra": "*",
