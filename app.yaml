@@ -9,11 +9,11 @@ manual_scaling:
 handlers:
 - url /client/(.*\.(html|css|js|png|gif|jpg|jpeg))
   static_files: client/\1
-  upload: client/(.*\.(html|css|js|png|gif|jpg|jpeg))
+#  upload: client/(.*\.(html|css|js|png|gif|jpg|jpeg))
 
-- url: /
-  static_files: client/index.html
-  upload: client/index.html
+#- url: /
+#  static_files: client/index.html
+#  upload: client/index.html
 
 - url: /.*
   script: server.js

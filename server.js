@@ -5,7 +5,7 @@ const url = require('url');
 const mongojs = require('mongojs');
 const api_endpoints = require('./api/endpoints.js');
 const render_view = require('./render/view.js');
-const serveme = require('./api/serveme.js');
+//const serveme = require('./api/serveme.js');
 const config = require('./config.js');
 
 http.createServer(function(request, response) {

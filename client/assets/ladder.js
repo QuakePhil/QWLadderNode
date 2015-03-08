@@ -1,5 +1,5 @@
 // ladder interface
-angular.module('LadderApp')
+angular.module('quakephil.QGApp')
 .controller('PopupController', ['$scope', '$http', '$modalInstance', function($scope, $http, $modalInstance) {
 	$scope.QNetAuth = function() {
 		console.log($scope.login);
@@ -15,7 +15,7 @@ angular.module('LadderApp')
 	};
 }])
 
-.controller('LadderController', ['$scope', '$http', '$modal', function($scope, $http, $modal) {
+.controller('QGController', ['$scope', '$http', '$modal', function($scope, $http, $modal) {
 	$scope.login = {};
 
 /*
