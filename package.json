@@ -1,0 +1,16 @@
+{
+  "name": "QWLadder",
+  "description": "QW Ladder Web App",
+  "version": "0.0.1",
+  "dependencies": {
+    "bl": "*",
+    "feedparser": "*",
+    "fs-extra": "*",
+    "irc": "*",
+    "mongodb": "*",
+    "mongojs": "*",
+    "request": "*",
+    "ws": "*",
+    "xml2js": "*"
+  }
+}
