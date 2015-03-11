@@ -3,6 +3,7 @@ var http = require('http')
 var bl = require('bl')
 
 var mapsbyip = {};
+var infobyip = {};
 var serverlistAge = 0;
 
 module.exports = function serverlist(cb) {
@@ -24,13 +25,15 @@ module.exports = function serverlist(cb) {
 						}
 					var key = val.ip + ':' + val.port;
 					mapsbyip[key] = val.map.toString();
+
+					infobyip[key] = val;
 					});
 				// in the form of [ {ipport1: dm3}, {ipport2: dm4}, ... ] 
-				cb(mapsbyip);
+				cb(mapsbyip, infobyip);
 				});
 			}))
 		})
 	else
-		cb(mapsbyip);
+		cb(mapsbyip, infobyip); //417 verizon
 	}
 

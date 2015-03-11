@@ -1,4 +1,4 @@
-angular.module('LadderApp', ['ui.router', 'ui.bootstrap', 'ngWebSocket'] )
+angular.module('quakephil.QGApp', ['ui.router', 'ui.bootstrap', 'ngWebSocket'] )
 
 .constant('wsServerPort', 'ws://52.0.31.38:8081')
 
@@ -12,8 +12,16 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $compileProvider
 
 	$stateProvider
 
-	.state('serveme', {
+	.state('index', {
 		url: '/',
+		templateUrl: '/assets/index.html',
+	})
+	.state('totalizator', {
+		url: '/totalizator',
+		templateUrl: '/assets/totalizator.html',
+	})
+	.state('serveme', {
+		url: '/serveme',
 		templateUrl: '/assets/serveme.html',
 	})
 	.state('search', {

@@ -1,4 +1,4 @@
-angular.module('LadderApp')
+angular.module('quakephil.QGApp')
 .filter('gt', function () {
     return function ( items, value ) {
 return items;
