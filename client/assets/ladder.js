@@ -17,6 +17,11 @@ angular.module('LadderApp')
 
 .controller('LadderController', ['$scope', '$http', '$modal', function($scope, $http, $modal) {
 	$scope.login = {};
+	$scope.gametype = {
+		hoonymode: true,
+		_1on1: false,
+		_2on2: false
+	};
 
 /*
 	$http

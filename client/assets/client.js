@@ -1,6 +1,6 @@
 angular.module('LadderApp', ['ui.router', 'ui.bootstrap', 'ngWebSocket'] )
 
-.constant('wsServerPort', 'ws://qwladder.herokuapp.com:8081')
+.constant('wsServerPort', 'ws://52.0.31.38:8081')
 
 .config(
 ['$stateProvider', '$urlRouterProvider', '$locationProvider', '$compileProvider', 
@@ -15,8 +15,7 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $compileProvider
 	.state('serveme', {
 		url: '/',
 		templateUrl: '/assets/serveme.html',
-	});
-/*
+	})
 	.state('search', {
 		url: '/search',
 		templateUrl: '/assets/search.html',
@@ -31,5 +30,5 @@ function($stateProvider, $urlRouterProvider, $locationProvider, $compileProvider
 		url: '/about',
 		templateUrl: '/assets/about.html',
 	});
-*/
+
 }]);

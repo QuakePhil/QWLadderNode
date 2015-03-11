@@ -2,10 +2,13 @@ const url = require('url');
 const qs = require('querystring');
 const mongojs = require('mongojs')
 const config = require('../config.js');
+const spawn = require('child_process').spawn;
 
 var db = mongojs.connect(config.mongo_uri, config.mongo_collections)
 
 var external_auth = require('./quakenet.js');
+
+var spawns = 
 
 // note: should we have an api object?
 // request
@@ -16,10 +19,6 @@ var external_auth = require('./quakenet.js');
 
 // note: we may want to save the status of users[].quakenet_auth
 // as well as implement an "authed as of"
-
-// note: these arrays need to be protected against flooding
-//var users = [];
-//var tokens = {}; // only one token per user so far
 
 function new_hash(value) {
 	return require('crypto').createHash('sha1').update(value).digest('hex');
@@ -45,103 +44,106 @@ function APIresult(response, result) {
 	}
 
 var endpoints = {
-	"/api/v1/register": function(req, response, body) {
-		console.log('endpoint: ' + req.pathname);
-		if (!body.pass)
-			APIresult(response, {error: "Password required"})
-		else db.users.findOne({ login: body.login }, function(error, user) {
-			if (!user) {
-				APIresult(response, {error: "User not found"})
-			} else if (user['auth_status'] == 0 || user['auth_status'] == 2) {
-				external_auth(body.login, body.pass, function(success) {
-					console.log('ext auth: ' + success)
-					if (success) {
-						var token = new_token(body.login);
-						db.users.update({ login: body.login },{
-							'$set': {
-								'auth_status': 3,
-								'pass_hash': new_hash(body.pass),
-								'token': token
-							}
-						});
-						APIresult(response, token);
-					} else {
-						db.users.update({ login: body.login },{
-							'$set': {'auth_status': 2}
-						});
-						APIresult(response, {error: "External auth failed"});
-					}
-				})
-			} else if (user['auth_status'] == 1) {
-				APIresult(response, {error: "External auth pending"});
-			} else if (user['auth_status'] == 3) {
-				db.users.findOne({login: body.login}, function(error, user){
-					if (new_hash(body.pass) == user['pass_hash'])
-						APIresult(response, {error: "Already registered, use /api/v1/token if you forgot your token"});
-					else
-						APIresult(response, {error: "Login failed"});
-				})
-			} else {
-				APIresult(response, {error: "Please login"});
-			}
-
-		})
-/*
-		if (users[body.login].auth_status == 0 || users[body.login].auth_status == 2) {
+"/api/v1/register": function(req, response, body) {
+	console.log('endpoint: ' + req.pathname);
+	if (!body.pass)
+		APIresult(response, {error: "Password required"})
+	else db.users.findOne({ login: body.login }, function(error, user) {
+		if (!user) {
+			APIresult(response, {error: "User not found"})
+		} else if (user['auth_status'] == 0 || user['auth_status'] == 2) {
 			external_auth(body.login, body.pass, function(success) {
-				console.log('external auth result: ' + success);
-				users[body.login].auth_status = success ? 3 : 2;
+				console.log('ext auth: ' + success)
 				if (success) {
-					users[body.login].pass_hash = new_hash(body.pass)
-					users[body.login].token = new_token(body.login)
-					APIresult(response, users[body.login].token)
+					var token = new_token(body.login);
+					db.users.update({ login: body.login },{
+						'$set': {
+							'auth_status': 3,
+							'pass_hash': new_hash(body.pass),
+							'token': token
+						}
+					});
+					APIresult(response, token);
 				} else {
-					APIresult(response, {"error": "Quakenet Authentication failed"})
+					db.users.update({ login: body.login },{
+						'$set': {'auth_status': 2}
+					});
+					APIresult(response, {error: "External auth failed"});
 				}
-			});
-		} else if (users[body.login].auth_status == 1) {
-			APIresult(response, {"error": "Quakenet Authentication pending"})
-		} else if (users[body.login].auth_status == 3) {
-			// check password for has here
-			if (new_hash(body.pass) == users[body.login].pass_hash)
-				APIresult(response, {"error": "Allready registered, use /api/v1/token if you lost your token"})
-			else
-				APIresult(response, {"error": "Login failed"})
+			})
+		} else if (user['auth_status'] == 1) {
+			APIresult(response, {error: "External auth pending"});
+		} else if (user['auth_status'] == 3) {
+			db.users.findOne({login: body.login}, function(error, user){
+				if (new_hash(body.pass) == user['pass_hash'])
+					APIresult(response, {error: "Already registered, use /api/v1/token if you forgot your token"});
+				else
+					APIresult(response, {error: "Login failed"});
+			})
 		} else {
-			APIresult(response, {"error": "Please try again later"})
+			APIresult(response, {error: "Please login"});
 		}
-*/
-	},
-	"/api/v1/token": function(req, response, body) {
-		if (!body.pass)
-			APIresult(response, {error: "Password required"})
-		else db.users.findOne({ login: body.login }, function(error, user) {
-			if (!user) {
-				APIresult(response, {error: "User not found"})
-			} else if (user['auth_status'] == 3 && new_hash(body.pass) == user['pass_hash']) {
-				var token = new_token(body.login);
-				db.users.update({ login: body.login },{
-					'$set': { 'token': token }
-				});
-				APIresult(response, token);
-			} else {
-				APIresult(response, {error: "Please login"});
-			}
-		})
+	})
 /*
-		if (users[body.login].auth_status == 3 && new_hash(body.pass) == users[body.login].pass_hash) {
-			users[body.login].token = new_token(body.login);
-			APIresult(response, users[body.login].token);
-		} else {
-			APIresult(response, {"error": "Please login"})
-		}
-*/
-	},
-	"/api/v1/secured": function(req, response, body) {
-		var date = new Date();
-		APIresult(response, { "unixtime": date.getTime() });
+	if (users[body.login].auth_status == 0 || users[body.login].auth_status == 2) {
+		external_auth(body.login, body.pass, function(success) {
+			console.log('external auth result: ' + success);
+			users[body.login].auth_status = success ? 3 : 2;
+			if (success) {
+				users[body.login].pass_hash = new_hash(body.pass)
+				users[body.login].token = new_token(body.login)
+				APIresult(response, users[body.login].token)
+			} else {
+				APIresult(response, {"error": "Quakenet Authentication failed"})
+			}
+		});
+	} else if (users[body.login].auth_status == 1) {
+		APIresult(response, {"error": "Quakenet Authentication pending"})
+	} else if (users[body.login].auth_status == 3) {
+		// check password for has here
+		if (new_hash(body.pass) == users[body.login].pass_hash)
+			APIresult(response, {"error": "Allready registered, use /api/v1/token if you lost your token"})
+		else
+			APIresult(response, {"error": "Login failed"})
+	} else {
+		APIresult(response, {"error": "Please try again later"})
 	}
+*/
+},
+
+"/api/v1/token": function(req, response, body) {
+	if (!body.pass)
+		APIresult(response, {error: "Password required"})
+	else db.users.findOne({ login: body.login }, function(error, user) {
+		if (!user) {
+			APIresult(response, {error: "User not found"})
+		} else if (user['auth_status'] == 3 && new_hash(body.pass) == user['pass_hash']) {
+			var token = new_token(body.login);
+			db.users.update({ login: body.login },{
+				'$set': { 'token': token }
+			});
+			APIresult(response, token);
+		} else {
+			APIresult(response, {error: "Please login"});
+		}
+	})
+/*
+	if (users[body.login].auth_status == 3 && new_hash(body.pass) == users[body.login].pass_hash) {
+		users[body.login].token = new_token(body.login);
+		APIresult(response, users[body.login].token);
+	} else {
+		APIresult(response, {"error": "Please login"})
+	}
+*/
+},
+
+// have zx64 take a look at this crap for holes
+"/api/v1/play": function(req, response, body) {
+	//var date = new Date();
+	//APIresult(response, { "unixtime": date.getTime() });
 }
+
+} // endpoints
 
 function processAPI(request, response, body) {
 	var req = url.parse(request.url, true);

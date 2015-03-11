@@ -1,4 +1,22 @@
 <div class="landing-template">
-	<h1>Hi, {{ greetMe }}</h1>
-	<p class="lead">Welcome to search</p>
+<div class="btn-group">
+	<label class="btn btn-primary" ng-model="gametype.hoonymode" btn-checkbox>hoonymode</label>
+	<label class="btn btn-primary" ng-model="gametype._1on1" btn-checkbox>1on1</label>
+	<label class="btn btn-primary" ng-model="gametype._2on2" btn-checkbox>2on2</label>
+</div>
+
+<div class="btn-group">
+	<button type="button" class="btn btn-danger">Search</button>
+	<button type="button" class="btn btn-danger dropdown-toggle" dropdown-toggle>
+		<span class="caret"></span>
+	<span class="sr-only">Split button!</span>
+	</button>
+	<ul class="dropdown-menu" role="menu">
+	<li><a href="#">Action</a></li>
+	<li><a href="#">Another action</a></li>
+	<li><a href="#">Something else here</a></li>
+	<li class="divider"></li>
+	<li><a href="#">Separated link</a></li>
+	</ul>
+</div>
 </div>
